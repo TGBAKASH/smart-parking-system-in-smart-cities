@@ -3,9 +3,12 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Framework-Flask%20v3.0.0-green.svg)](https://flask.palletsprojects.com/)
 [![Database](https://img.shields.io/badge/Database-MongoDB-brightgreen.svg)](https://www.mongodb.com/)
+[![Live App](https://img.shields.io/badge/Live_Web_App-smartcityparking.onrender.com-brightgreen)](https://smartcityparking.onrender.com)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
 A decentralized, full-stack **Peer-to-Peer (P2P) Smart Parking Marketplace** designed for modern smart cities. The platform empowers space owners (Hosts) to monetize underutilized private driveways, residential garages, and vacant commercial spots, while enabling drivers to seamlessly search, reserve, navigate to, and pay for parking spots in real time.
+
+🌐 **Live Application**: [https://smartcityparking.onrender.com](https://smartcityparking.onrender.com)
 
 ---
 
