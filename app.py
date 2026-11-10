@@ -62,9 +62,9 @@ def create_app(config_class=Config):
         # Test the connection
         client.admin.command('ping')
         app.db = client.get_database()
-        print("✅ MongoDB connection successful!")
+        print("[OK] MongoDB connection successful!")
     except Exception as e:
-        print(f"⚠️  MongoDB connection failed: {e}")
+        print(f"[WARN] MongoDB connection failed: {e}")
         print("App will start but database operations will fail.")
         print("Please check your MONGO_URI in .env file")
         # Create a dummy db object to prevent immediate crash
@@ -74,10 +74,17 @@ def create_app(config_class=Config):
     try:
         if hasattr(app, 'db') and app.db is not None:
             db.init_app(app)
+            
+            # Ensure density data baseline exists in DB if empty
+            try:
+                from seed_density_data import ensure_density_data_in_db
+                ensure_density_data_in_db(app.db)
+            except Exception as seed_err:
+                print(f"[WARN] Auto-seed check notice: {seed_err}")
     except Exception as e:
-        print(f"⚠️  Database initialization warning: {e}")
+        print(f"[WARN] Database initialization warning: {e}")
     
-    print("✅ Images stored as base64 in MongoDB (no local files needed)")
+    print("[OK] Images stored as base64 in MongoDB (no local files needed)")
     
     # Register blueprints
     app.register_blueprint(web_bp)  # Web pages (no prefix)
@@ -132,5 +139,4 @@ def create_app(config_class=Config):
 app = create_app()
 
 if __name__ == '__main__':
-    app = create_app()
     app.run(host='0.0.0.0', port=5000, debug=True)

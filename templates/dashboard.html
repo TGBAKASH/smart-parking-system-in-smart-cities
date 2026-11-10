@@ -689,7 +689,33 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    const spaces = data.parking_spaces || [];
+                    let spaces = data.parking_spaces || [];
+
+                    if (spaces.length === 0) {
+                        try {
+                            const fallbackRes = await fetch('/static/data/density_data.json');
+                            if (fallbackRes.ok) {
+                                const mockData = await fallbackRes.json();
+                                spaces = (mockData.areas || []).map(item => ({
+                                    id: item.id,
+                                    title: item.name,
+                                    address: 'Smart City Zone - Hub ' + item.short_name,
+                                    price_per_hour: item.price_per_hour || 40,
+                                    total_spaces: item.total_spaces || 50,
+                                    available_spaces: Math.max(2, (item.total_spaces || 50) - item.bookings),
+                                    total_hours: 24,
+                                    vehicle_type: '4-wheeler',
+                                    status: 'approved',
+                                    is_available: true,
+                                    total_bookings: item.bookings,
+                                    ai_density: item.ai_prediction,
+                                    images: []
+                                }));
+                            }
+                        } catch (err) {
+                            console.error('Client-side density fallback notice:', err);
+                        }
+                    }
 
                     if (spaces.length === 0) {
                         grid.innerHTML = `
