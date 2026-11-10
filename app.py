@@ -9,6 +9,7 @@ from flask_jwt_extended import JWTManager
 from pymongo import MongoClient
 from datetime import datetime
 import os
+import threading
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -51,40 +52,33 @@ def create_app(config_class=Config):
     # Initialize JWT
     jwt = JWTManager(app)
     
-    # Initialize MongoDB with better error handling
+    # Initialize MongoDB with safe timeout
     try:
         client = MongoClient(
             app.config['MONGO_URI'],
-            serverSelectionTimeoutMS=5000,  # 5 second timeout
-            connectTimeoutMS=10000,
-            socketTimeoutMS=10000
+            serverSelectionTimeoutMS=4000,
+            connectTimeoutMS=8000,
+            socketTimeoutMS=8000
         )
-        # Test the connection
         client.admin.command('ping')
         app.db = client.get_database()
         print("[OK] MongoDB connection successful!")
     except Exception as e:
-        print(f"[WARN] MongoDB connection failed: {e}")
-        print("App will start but database operations will fail.")
-        print("Please check your MONGO_URI in .env file")
-        # Create a dummy db object to prevent immediate crash
+        print(f"[WARN] MongoDB connection notice: {e}")
         app.db = None
     
     # Initialize database helper
     try:
         if hasattr(app, 'db') and app.db is not None:
             db.init_app(app)
-            
-            # Ensure density data baseline exists in DB if empty
+            # Ensure density data baseline exists in DB in the background
             try:
                 from seed_density_data import ensure_density_data_in_db
-                ensure_density_data_in_db(app.db)
+                threading.Thread(target=ensure_density_data_in_db, args=(app.db,), daemon=True).start()
             except Exception as seed_err:
-                print(f"[WARN] Auto-seed check notice: {seed_err}")
+                print(f"[WARN] Background seed notice: {seed_err}")
     except Exception as e:
-        print(f"[WARN] Database initialization warning: {e}")
-    
-    print("[OK] Images stored as base64 in MongoDB (no local files needed)")
+        print(f"[WARN] Database initialization notice: {e}")
     
     # Register blueprints
     app.register_blueprint(web_bp)  # Web pages (no prefix)
@@ -98,7 +92,7 @@ def create_app(config_class=Config):
     app.register_blueprint(wallet_bp, url_prefix='/api/wallet')
     app.register_blueprint(review_bp, url_prefix='/api/review')
     
-    # Health check endpoint
+    # Health check endpoint - always fast and non-blocking
     @app.route('/health')
     def health_check():
         return jsonify({
@@ -139,4 +133,5 @@ def create_app(config_class=Config):
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
