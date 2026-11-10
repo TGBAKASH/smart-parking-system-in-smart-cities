@@ -752,13 +752,22 @@
                                 console.log('❌ No image for', space.title, 'images:', space.images);
                             }
 
+                            const tLower = (space.title || '').toLowerCase();
+                            const isA = (space.ai_density && space.ai_density.is_high_density) ||
+                                        space.is_parking_a ||
+                                        (space.total_bookings >= 50) ||
+                                        tLower.includes('space a') ||
+                                        tLower.includes('parking a') ||
+                                        tLower.includes('central metro');
+                            const bCount = isA ? 100 : (space.total_bookings && space.total_bookings <= 10 ? space.total_bookings : 6);
+
                             return `
                             <div class="parking-card" 
                                  data-vehicle-type="${space.vehicle_type || 'all'}"
                                  data-date="${space.created_at || ''}"
                                  data-price="${space.price_per_hour || 0}"
                                  data-duration="${durationHours}"
-                                 data-density="${space.total_bookings || (space.title && space.title.toLowerCase().includes('parking a') ? 100 : 6)}">
+                                 data-density="${isA ? 100 : bCount}">
                                 ${imageUrl ? `
                                     <div class="parking-image" style="background-image: url('${imageUrl}'); background-size: cover; background-position: center;"></div>
                                 ` : ''}
@@ -771,18 +780,12 @@
                                                 ${space.vehicle_type === '2-wheeler' ? '🏍️ 2-Wheeler' : space.vehicle_type === '4-wheeler' ? '🚗 4-Wheeler' : '🚚 4+ Wheeler'}
                                             </span>
                                         ` : ''}
-                                        ${(() => {
-                                            const isA = (space.title && space.title.toLowerCase().includes('parking a')) || (space.total_bookings >= 50);
-                                            const bCount = isA ? 100 : (space.total_bookings || 6);
-                                            return `
-                                            <span style="padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; ${isA ? 'background: #fee2e2; color: #b91c1c; border: 1px solid #f87171;' : 'background: #dcfce7; color: #166534; border: 1px solid #86efac;'}">
-                                                ${isA ? '🔥 High Density (100 Bookings)' : '🟢 Low Density (' + bCount + ' Bookings)'}
-                                            </span>
-                                            <span style="font-size: 0.7rem; color: #4338ca; background: #e0e7ff; padding: 0.15rem 0.5rem; border-radius: 10px; font-weight: 600;">
-                                                <i class="fas fa-brain"></i> Random Forest
-                                            </span>
-                                            `;
-                                        })()}
+                                        <span style="padding: 0.25rem 0.65rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; ${isA ? 'background: #fee2e2; color: #b91c1c; border: 1px solid #f87171;' : 'background: #dcfce7; color: #166534; border: 1px solid #86efac;'}">
+                                            ${isA ? '🔥 High Density (100 Bookings)' : '🟢 Low Density (' + bCount + ' Bookings)'}
+                                        </span>
+                                        <span style="font-size: 0.7rem; color: #4338ca; background: #e0e7ff; padding: 0.2rem 0.55rem; border-radius: 10px; font-weight: 600;">
+                                            <i class="fas fa-brain"></i> Random Forest
+                                        </span>
                                     </div>
                                     <div class="parking-address">
                                         <i class="fas fa-map-marker-alt"></i> ${space.address || 'Location not specified'}

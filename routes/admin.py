@@ -501,7 +501,7 @@ def get_area_wise_ml_analytics():
                 for s in raw_spaces:
                     space_dict = ParkingSpace.to_dict(s)
                     title = space_dict.get('title', '')
-                    is_a = 'parking a' in title.lower() or space_dict.get('is_parking_a', False)
+                    is_a = ('space a' in title.lower() or 'parking a' in title.lower() or 'central metro' in title.lower() or space_dict.get('is_parking_a', False) is True or space_dict.get('key') == 'A' or int(space_dict.get('total_bookings', 0)) >= 50)
                     if is_a:
                         b_count = 100
                         has_parking_a = True

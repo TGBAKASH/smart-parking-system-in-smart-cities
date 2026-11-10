@@ -218,15 +218,30 @@ class RandomForestDensityEngine:
         address = (space_dict.get('address') or '').lower()
         
         # Check if space is explicitly designated as Parking A or high density
-        if 'parking a' in title or 'parking a' in address or space_dict.get('is_parking_a', False):
-            booking_count = int(space_dict.get('total_bookings', 0))
-            if booking_count < 50:
-                booking_count = 100  # Enforce false density scenario: 100 people going to Parking A
+        # Matches 'Parking Space A', 'Parking A', 'Central Metro', 'Space A', or is_parking_a flag
+        short_name = (space_dict.get('short_name') or '').lower()
+        is_parking_a = (
+            'space a' in title or
+            'parking a' in title or
+            'central metro' in title or
+            'space a' in address or
+            'space a' in short_name or
+            space_dict.get('is_parking_a', False) is True or
+            space_dict.get('key') == 'A' or
+            int(space_dict.get('total_bookings', 0)) >= 50
+        )
+
+        if is_parking_a:
+            booking_count = 100  # Enforce false density scenario: 100 people going to Parking A (High Density)
+            space_dict['is_parking_a'] = True
         else:
-            booking_count = int(space_dict.get('total_bookings', 0))
-            # Remaining parkings are 10 or below
-            if booking_count > 10:
-                booking_count = (booking_count % 8) + 2
+            curr_b = int(space_dict.get('total_bookings', 0))
+            if curr_b > 10 or curr_b == 0:
+                # Deterministic low booking count <= 10 based on space title
+                seed_val = sum(ord(c) for c in (title or 'B'))
+                booking_count = (seed_val % 6) + 4
+            else:
+                booking_count = curr_b
 
         total_spaces = int(space_dict.get('total_spaces', 20))
         price = float(space_dict.get('price_per_hour', 40))

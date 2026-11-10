@@ -320,6 +320,7 @@ class ParkingSpace:
             'rating': parking.get('rating', 0.0),
             'total_reviews': parking.get('total_reviews', 0),
             'total_bookings': parking.get('total_bookings', 0),
+            'is_parking_a': parking.get('is_parking_a', False),
             'created_at': parking['created_at'].isoformat() if hasattr(parking['created_at'], 'isoformat') else parking['created_at'],
             'updated_at': parking['updated_at'].isoformat() if hasattr(parking['updated_at'], 'isoformat') else parking['updated_at'],
             # Edit tracking fields
