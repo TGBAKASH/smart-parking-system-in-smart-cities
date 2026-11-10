@@ -13,6 +13,7 @@ function switchTab(tabName) {
         case 'all-parking': loadAllParking(); break;
         case 'users': loadUsers(); break;
         case 'bookings': loadBookings(); break;
+        case 'analytics': loadAreaWiseAnalytics(); break;
     }
 }
 

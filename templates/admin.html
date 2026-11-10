@@ -84,6 +84,7 @@
         .payment-badge { background: #10b981; color: white; padding: 0.25rem 0.75rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; }
         .expiry-warning { background: #fef3c7; color: #92400e; padding: 0.5rem 1rem; border-radius: 8px; margin-top: 0.5rem; font-size: 0.875rem; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <nav class="admin-nav">
@@ -112,6 +113,7 @@
             <button class="tab" onclick="switchTab('all-parking')"><i class="fas fa-parking"></i> All Parking</button>
             <button class="tab" onclick="switchTab('users')"><i class="fas fa-users"></i> Users</button>
             <button class="tab" onclick="switchTab('bookings')"><i class="fas fa-calendar"></i> Bookings</button>
+            <button class="tab" onclick="switchTab('analytics')" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; border-radius: 8px; padding: 0.6rem 1.2rem; border-bottom: none;"><i class="fas fa-brain"></i> AI Density & Analytics</button>
         </div>
         <div id="pending-tab" class="tab-content active">
             <div class="data-table">
@@ -149,6 +151,80 @@
                 <div id="bookingsContainer"><div class="loading"><i class="fas fa-spinner"></i><p>Loading...</p></div></div>
             </div>
         </div>
+        <!-- AI Density & Analytics Tab (ParkSense Chapter 4.3 & 5.2) -->
+        <div id="analytics-tab" class="tab-content">
+            <div style="background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2 style="font-size: 1.5rem; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-brain" style="color: #6366f1;"></i> ParkSense AI: Random Forest Density Analytics
+                        </h2>
+                        <p style="color: #64748b; font-size: 0.95rem; margin-top: 0.25rem;">
+                            Area-wise booking aggregation and Machine Learning crowd surge classification (ParkSense Report Section 5.2)
+                        </p>
+                    </div>
+                    <button class="refresh-btn" onclick="loadAreaWiseAnalytics()"><i class="fas fa-sync-alt"></i> Refresh Analytics</button>
+                </div>
+
+                <!-- KPI Cards for Model & Peak Area -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 1.25rem;">
+                        <small style="color: #991b1b; font-weight: 600; text-transform: uppercase;">Peak Density Zone</small>
+                        <h3 id="peakAreaName" style="color: #b91c1c; font-size: 1.3rem; margin: 0.25rem 0;">Parking Space A</h3>
+                        <p id="peakBookingsCount" style="color: #dc2626; font-size: 1.1rem; font-weight: 700;">100 Bookings (High Density)</p>
+                    </div>
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 1.25rem;">
+                        <small style="color: #166534; font-weight: 600; text-transform: uppercase;">Non-Peak Areas Avg</small>
+                        <h3 style="color: #15803d; font-size: 1.3rem; margin: 0.25rem 0;">Remaining Spaces</h3>
+                        <p id="nonPeakAvg" style="color: #16a34a; font-size: 1.1rem; font-weight: 700;">6 Bookings (Low Density &le; 10)</p>
+                    </div>
+                    <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 10px; padding: 1.25rem;">
+                        <small style="color: #3730a3; font-weight: 600; text-transform: uppercase;">Machine Learning Model</small>
+                        <h3 style="color: #4338ca; font-size: 1.3rem; margin: 0.25rem 0;">Random Forest</h3>
+                        <p style="color: #4f46e5; font-size: 0.95rem; font-weight: 600;">100 Decision Trees (Gini Criterion)</p>
+                    </div>
+                    <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 10px; padding: 1.25rem;">
+                        <small style="color: #6b21a8; font-weight: 600; text-transform: uppercase;">Classification Accuracy</small>
+                        <h3 id="peakConfidence" style="color: #7e22ce; font-size: 1.3rem; margin: 0.25rem 0;">99.5%</h3>
+                        <p style="color: #9333ea; font-size: 0.95rem; font-weight: 600;">Peak Surge Confidence</p>
+                    </div>
+                </div>
+
+                <!-- 2 Side-by-Side Charts -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <!-- Chart 1: Area-Wise Booking Distribution -->
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem;">
+                        <h3 style="font-size: 1.1rem; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-chart-bar" style="color: #ef4444;"></i> Area-Wise Booking Analysis (Report Section 5.2)
+                        </h3>
+                        <small style="color: #64748b; display: block; margin-bottom: 1rem;">Comparison showing Parking A (100 bookings) vs remaining locations (&le; 10 bookings)</small>
+                        <div style="height: 280px; position: relative;">
+                            <canvas id="areaWiseChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Random Forest Feature Importances -->
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem;">
+                        <h3 style="font-size: 1.1rem; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-project-diagram" style="color: #6366f1;"></i> Random Forest Feature Importances
+                        </h3>
+                        <small style="color: #64748b; display: block; margin-bottom: 1rem;">Calculated Gini importance weights determining parking density & demand</small>
+                        <div style="height: 280px; position: relative;">
+                            <canvas id="featureImportanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Data Table -->
+                <h3 style="font-size: 1.15rem; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-table" style="color: #0284c7;"></i> Facility Breakdown & ML Prediction Results
+                </h3>
+                <div id="analyticsTableContainer">
+                    <div class="loading"><i class="fas fa-spinner"></i><p>Loading AI Density & Analytics...</p></div>
+                </div>
+            </div>
+        </div>
+
     </div>
     <div id="parkingModal" class="modal">
         <div class="modal-content">

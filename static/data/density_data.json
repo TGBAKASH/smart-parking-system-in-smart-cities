@@ -1,0 +1,105 @@
+{
+  "generated_at": "2026-11-10T17:04:25.449470+05:30",
+  "target_scenario": {
+    "description": "Parking A has 100 bookings (High Density), remaining parking spaces have <= 10 bookings",
+    "parking_a_count": 100,
+    "max_other_count": 10
+  },
+  "areas": [
+    {
+      "id": "parking_a_demo",
+      "name": "Parking Space A (Central Metro Hub)",
+      "short_name": "Parking A",
+      "bookings": 100,
+      "total_spaces": 120,
+      "price_per_hour": 50,
+      "ai_prediction": {
+        "level": "High Density",
+        "score": 99.4,
+        "confidence": 99.5,
+        "booking_count": 100,
+        "traffic_status": "Heavy Congestion",
+        "badge_class": "badge-danger",
+        "badge_icon": "\ud83d\udd25",
+        "badge_label": "\ud83d\udd25 High Density (100 Bookings / Peak Surge)",
+        "is_high_density": true
+      },
+      "share_percentage": 84.7
+    },
+    {
+      "id": "parking_b_demo",
+      "name": "Parking Space B (North Station Plaza)",
+      "short_name": "Parking B",
+      "bookings": 8,
+      "total_spaces": 40,
+      "price_per_hour": 40,
+      "ai_prediction": {
+        "level": "Low Density",
+        "score": 9.9,
+        "confidence": 99.4,
+        "booking_count": 8,
+        "traffic_status": "Fast Parking",
+        "badge_class": "badge-success",
+        "badge_icon": "\ud83d\udfe2",
+        "badge_label": "\ud83d\udfe2 Low Density (8 Bookings / High Availability)",
+        "is_high_density": false
+      },
+      "share_percentage": 6.8
+    },
+    {
+      "id": "parking_c_demo",
+      "name": "Parking Space C (West Avenue Market)",
+      "short_name": "Parking C",
+      "bookings": 6,
+      "total_spaces": 30,
+      "price_per_hour": 35,
+      "ai_prediction": {
+        "level": "Low Density",
+        "score": 9.8,
+        "confidence": 98.4,
+        "booking_count": 6,
+        "traffic_status": "Fast Parking",
+        "badge_class": "badge-success",
+        "badge_icon": "\ud83d\udfe2",
+        "badge_label": "\ud83d\udfe2 Low Density (6 Bookings / High Availability)",
+        "is_high_density": false
+      },
+      "share_percentage": 5.1
+    },
+    {
+      "id": "parking_d_demo",
+      "name": "Parking Space D (Green Tech Park)",
+      "short_name": "Parking D",
+      "bookings": 4,
+      "total_spaces": 50,
+      "price_per_hour": 30,
+      "ai_prediction": {
+        "level": "Low Density",
+        "score": 9.9,
+        "confidence": 99.5,
+        "booking_count": 4,
+        "traffic_status": "Fast Parking",
+        "badge_class": "badge-success",
+        "badge_icon": "\ud83d\udfe2",
+        "badge_label": "\ud83d\udfe2 Low Density (4 Bookings / High Availability)",
+        "is_high_density": false
+      },
+      "share_percentage": 3.4
+    }
+  ],
+  "feature_importances": {
+    "Recent Booking Volume": 0.546,
+    "Total Capacity": 0.198,
+    "Price per Hour": 0.055,
+    "Time of Day (Peak Hours)": 0.02,
+    "Day of Week": 0.001,
+    "Occupancy Ratio": 0.181
+  },
+  "peak_summary": {
+    "peak_area": "Parking Space A (Central Metro Hub)",
+    "peak_bookings": 100,
+    "peak_density_level": "High Density",
+    "peak_confidence": 99.5,
+    "non_peak_average": 6.0
+  }
+}
